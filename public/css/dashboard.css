@@ -1,0 +1,218 @@
+/* Dashboard specific styles */
+.stats-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    padding: 1.25rem;
+    overflow: hidden;
+}
+
+.stats-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    color: white;
+}
+
+.card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+/* Sidebar styles */
+#sidebar {
+    background-color: #f9fafb;
+    width: 14rem;
+    min-height: 100vh;
+    border-right: 1px solid #e5e7eb;
+}
+
+/* Fix for sidebar positioning */
+.lg\:pl-55 {
+    padding-left: 14rem;
+}
+
+/* Navbar styles */
+.navbar {
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+}
+
+/* Fix for content positioning with navbar */
+.pt-16 {
+    padding-top: 4rem;
+}
+
+/* Color classes for stats icons */
+.bg-blue-500 {
+    background-color: #3b82f6;
+}
+
+.bg-indigo-500 {
+    background-color: #6366f1;
+}
+
+.bg-green-500 {
+    background-color: #10b981;
+}
+
+.bg-yellow-500 {
+    background-color: #f59e0b;
+}
+
+.bg-red-500 {
+    background-color: #ef4444;
+}
+
+/* Text colors */
+.text-gray-900 {
+    color: #111827;
+}
+
+.text-gray-500 {
+    color: #6b7280;
+}
+
+.text-primary-800 {
+    color: #373A8D;
+}
+
+/* Spacing utilities */
+.space-y-8>*+* {
+    margin-top: 2rem;
+}
+
+.space-y-6>*+* {
+    margin-top: 1.5rem;
+}
+
+.space-y-3>*+* {
+    margin-top: 0.75rem;
+}
+
+/* Grid utilities */
+.grid {
+    display: grid;
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.gap-5 {
+    gap: 1.25rem;
+}
+
+.gap-8 {
+    gap: 2rem;
+}
+
+@media (min-width: 640px) {
+    .sm\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .lg\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lg\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .lg\:col-span-2 {
+        grid-column: span 2 / span 2;
+    }
+}
+
+/* Utility classes */
+.capitalize {
+    text-transform: capitalize;
+}
+
+.h-64 {
+    height: 16rem;
+}
+
+.rounded-lg {
+    border-radius: 0.5rem;
+}
+
+.bg-gray-50 {
+    background-color: #f9fafb;
+}
+
+.divide-y>*+* {
+    border-top-width: 1px;
+    border-top-style: solid;
+}
+
+.divide-gray-200 {
+    border-color: #e5e7eb;
+}
+
+.hover\:bg-gray-50:hover {
+    background-color: #f9fafb;
+}
+
+/* Badge styles */
+.inline-flex {
+    display: inline-flex;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.bg-red-100 {
+    background-color: #fee2e2;
+}
+
+.text-red-800 {
+    color: #991b1b;
+}
+
+.text-red-500 {
+    color: #ef4444;
+}
+
+/* Fix for dropdown menus */
+#user-management-menu,
+#training-management-menu,
+#reports-menu {
+    display: block;
+}
