@@ -23,6 +23,11 @@ class Instructure extends Model
         return $this->hasOne(User::class, 'instructure_id');
     }
 
+    public function users()
+    {
+        return $this->hasMany(User::class, 'instructure_id');
+    }
+
     public function classes()
     {
         return $this->belongsToMany(ClassModel::class, 'instructure_classes', 'instructure_id', 'class_id');
