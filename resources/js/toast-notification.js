@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
-        container.className = 'fixed top-4 right-4 z-50 max-w-sm';
+        container.className = 'fixed top-4 right-4 z-50 max-w-md space-y-2';
         document.body.appendChild(container);
     }
 });
@@ -31,8 +31,12 @@ window.showToast = function(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    // Truncate message if too long
+    const maxLength = 150;
+    const displayMessage = message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
+    
     const toast = document.createElement('div');
-    toast.className = `toast animate-slide-down mb-2 max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto border-l-4 overflow-hidden ${
+    toast.className = `toast animate-slide-down mb-2 max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto border-l-4 overflow-hidden ${
         type === 'success' ? 'border-green-400' : 
         type === 'error' ? 'border-red-400' : 
         type === 'warning' ? 'border-yellow-400' : 'border-blue-400'
@@ -55,8 +59,9 @@ window.showToast = function(message, type = 'success') {
                 <div class="flex-shrink-0">
                     ${icon}
                 </div>
-                <div class="ml-3 flex-1">
-                    <p class="text-sm font-medium text-gray-900 whitespace-normal break-words">${message}</p>
+                <div class="ml-3 flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 break-words leading-relaxed">${displayMessage}</p>
+                    ${message.length > maxLength ? `<button class="text-xs text-blue-600 hover:text-blue-800 mt-1 show-full-message">Lihat selengkapnya</button>` : ''}
                 </div>
                 <div class="ml-4 flex-shrink-0 flex">
                     <button class="close-toast bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none">
@@ -90,5 +95,15 @@ window.showToast = function(message, type = 'success') {
             toast.remove();
         }, 300);
     });
+    
+    // Show full message handler
+    const showFullBtn = toast.querySelector('.show-full-message');
+    if (showFullBtn) {
+        showFullBtn.addEventListener('click', () => {
+            const messageEl = toast.querySelector('p');
+            messageEl.textContent = message;
+            showFullBtn.remove();
+        });
+    }
 };
 

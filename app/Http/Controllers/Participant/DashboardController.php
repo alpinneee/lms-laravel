@@ -20,6 +20,17 @@ class DashboardController extends Controller
         $user = Auth::user();
         $participant = $user->participant;
 
+        // Buat profil participant jika belum ada
+        if (!$participant && ($user->isParticipant() || $user->isUnassigned())) {
+            $participant = \App\Models\Participant::create([
+                'user_id' => $user->id,
+                'full_name' => $user->name,
+            ]);
+            // Refresh user relationship
+            $user->load('participant');
+            $participant = $user->participant;
+        }
+
         if (!$participant) {
             return redirect()->route('login')->with('error', 'Participant profile not found.');
         }
@@ -72,8 +83,10 @@ class DashboardController extends Controller
             ->get();
 
         // Payment history
-        $paymentHistory = Payment::where('participant_id', $participant->id)
-        ->with(['course'])
+        $paymentHistory = Payment::whereHas('registration', function($query) use ($participant) {
+            $query->where('participant_id', $participant->id);
+        })
+        ->with(['registration.class.course'])
         ->latest()
         ->limit(5)
         ->get();
@@ -118,9 +131,10 @@ class DashboardController extends Controller
             
             // Recent Payments
             $paymentHistory->take(3)->map(function ($payment) {
+                $courseName = $payment->registration?->class?->course?->course_name ?? 'Unknown Course';
                 return [
                     'type' => 'payment',
-                    'message' => 'Payment of $' . number_format($payment->amount, 2) . ' for ' . $payment->course->course_name,
+                    'message' => 'Payment of $' . number_format($payment->amount, 2) . ' for ' . $courseName,
                     'time' => $payment->created_at,
                     'icon' => 'credit-card',
                     'color' => 'green'

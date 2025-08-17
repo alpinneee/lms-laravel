@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CourseController;
@@ -18,17 +19,34 @@ use App\Http\Controllers\Participant\DashboardController as ParticipantDashboard
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// Guest routes (authentication)
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::get('/forgot-password', [AuthController::class, 'showResetPassword'])->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'resetPassword'])->name('password.email');
-    Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
-});
+// Authentication routes (no middleware to avoid conflicts)
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::get('/forgot-password', [AuthController::class, 'showResetPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'resetPassword'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'updatePassword'])->name('password.update');
+
+// Google OAuth routes
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+// Root route - handle redirects based on authentication
+Route::get('/', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        if ($user->isAdmin()) {
+            return redirect('/admin/dashboard');
+        } elseif ($user->isInstructor()) {
+            return redirect('/instructor/dashboard');
+        } else {
+            return redirect('/participant/dashboard');
+        }
+    }
+    return redirect('/login');
+})->name('home');
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
@@ -37,24 +55,6 @@ Route::middleware('auth')->group(function () {
     // Profile routes (available for all authenticated users)
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    
-    // Root redirect based on user type
-    Route::get('/', function () {
-        $user = Auth::user();
-        
-        if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->isInstructor()) {
-            return redirect()->route('instructor.dashboard');
-        } elseif ($user->isParticipant()) {
-            return redirect()->route('participant.dashboard');
-        } elseif ($user->isUnassigned()) {
-            // Redirect unassigned users to participant dashboard
-            return redirect()->route('participant.dashboard');
-        }
-        
-        return redirect()->route('login');
-    });
 });
 
 // Admin Routes
@@ -221,27 +221,32 @@ Route::middleware(['auth', 'role:participant'])->prefix('participant')->name('pa
 });
 
 // API Routes
-Route::middleware('auth:sanctum')->prefix('api')->group(function () {
-    Route::post('/auth/logout', [AuthController::class, 'apiLogout']);
+Route::prefix('api')->group(function () {
+    Route::post('/auth/login', [AuthController::class, 'apiLogin']);
+    Route::post('/auth/register', [AuthController::class, 'apiRegister']);
     
-    // Courses API
-    Route::get('/courses', function () {
-        return response()->json(['message' => 'Courses API endpoint']);
-    });
-    
-    // Users API
-    Route::get('/users', function () {
-        return response()->json(['message' => 'Users API endpoint']);
-    });
-    
-    // Certificates API
-    Route::get('/certificates', function () {
-        return response()->json(['message' => 'Certificates API endpoint']);
-    });
-    
-    // Payments API
-    Route::get('/payments', function () {
-        return response()->json(['message' => 'Payments API endpoint']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/auth/logout', [AuthController::class, 'apiLogout']);
+        
+        // Courses API
+        Route::get('/courses', function () {
+            return response()->json(['message' => 'Courses API endpoint']);
+        });
+        
+        // Users API
+        Route::get('/users', function () {
+            return response()->json(['message' => 'Users API endpoint']);
+        });
+        
+        // Certificates API
+        Route::get('/certificates', function () {
+            return response()->json(['message' => 'Certificates API endpoint']);
+        });
+        
+        // Payments API
+        Route::get('/payments', function () {
+            return response()->json(['message' => 'Payments API endpoint']);
+        });
     });
 });
 
@@ -260,11 +265,7 @@ Route::get('/send-test-email', function () {
     }
 });
 
-// Public API Routes
-Route::prefix('api')->group(function () {
-    Route::post('/auth/login', [AuthController::class, 'apiLogin']);
-    Route::post('/auth/register', [AuthController::class, 'apiRegister']);
-});
+
 
 // Test email route (only for development)
 if (app()->environment('local')) {
@@ -290,6 +291,11 @@ if (app()->environment('local')) {
         }
         return back()->with('success', 'User tidak ditemukan');
     });
+}
+
+// Include debug routes
+if (app()->environment('local')) {
+    include __DIR__ . '/debug.php';
 }
 
 // Helper function for reading log file

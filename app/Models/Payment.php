@@ -50,16 +50,7 @@ class Payment extends Model
      */
     public function registration()
     {
-        // Coba cari berdasarkan participant_id dan course_id jika registration_id tidak ada
-        if ($this->registration_id) {
-            return $this->belongsTo(CourseRegistration::class, 'registration_id');
-        } else {
-            return CourseRegistration::where('participant_id', $this->participant_id)
-                ->whereHas('class', function ($query) {
-                    $query->where('course_id', $this->course_id);
-                })
-                ->first();
-        }
+        return $this->belongsTo(CourseRegistration::class, 'registration_id');
     }
 
     /**

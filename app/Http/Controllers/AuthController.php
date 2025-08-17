@@ -44,6 +44,14 @@ class AuthController extends Controller
             // Update last login
             $user->update(['last_login' => now()]);
             
+            // Pastikan profil participant ada jika user adalah participant
+            if (($user->isParticipant() || $user->isUnassigned()) && !$user->participant) {
+                \App\Models\Participant::create([
+                    'user_id' => $user->id,
+                    'full_name' => $user->name,
+                ]);
+            }
+            
             // Get user role for welcome message
             $userRole = $user->getUserRole();
             $welcomeMessage = 'Welcome back, ' . $user->name . '! You have successfully logged in.';
@@ -101,6 +109,14 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'user_type_id' => $unassignedType->id,
         ]);
+
+        // Buat profil participant jika user type adalah participant atau unassigned
+        if ($unassignedType->usertype === 'participant' || $unassignedType->usertype === 'unassigned') {
+            \App\Models\Participant::create([
+                'user_id' => $user->id,
+                'full_name' => $request->username,
+            ]);
+        }
 
         Auth::login($user);
 
@@ -293,6 +309,14 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'user_type_id' => $unassignedType->id,
         ]);
+
+        // Buat profil participant jika user type adalah participant atau unassigned
+        if ($unassignedType->usertype === 'participant' || $unassignedType->usertype === 'unassigned') {
+            \App\Models\Participant::create([
+                'user_id' => $user->id,
+                'full_name' => $request->username,
+            ]);
+        }
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
