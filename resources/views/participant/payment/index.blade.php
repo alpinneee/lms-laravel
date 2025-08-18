@@ -88,7 +88,7 @@
                 <div class="ml-5 w-0 flex-1">
                     <dl>
                         <dt class="text-sm font-medium text-gray-500 truncate">Total Paid</dt>
-                        <dd class="text-2xl font-bold text-gray-900">${{ number_format($stats['total_paid'], 2) }}</dd>
+                        <dd class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_paid'], 0, ',', '.') }}</dd>
                     </dl>
                 </div>
             </div>
@@ -152,9 +152,9 @@
                                     </span>
                                 </td>
                                 <td class="table-cell">
-                                    <div class="text-sm text-gray-900">${{ number_format($registration->payment, 2) }}</div>
+                                    <div class="text-sm text-gray-900">Rp {{ number_format($registration->payment, 0, ',', '.') }}</div>
                                     @if($registration->payment_status === 'partial')
-                                        <div class="text-xs text-gray-500">Paid: ${{ number_format($registration->payments->where('status', 'verified')->sum('amount'), 2) }}</div>
+                                        <div class="text-xs text-gray-500">Paid: Rp {{ number_format($registration->payments->where('status', 'verified')->sum('amount'), 0, ',', '.') }}</div>
                                     @endif
                                 </td>
                                 <td class="table-cell text-right text-sm font-medium">

@@ -171,7 +171,7 @@
                                 <h4 class="font-medium text-gray-900 mb-2">{{ $class->course->course_name }}</h4>
                                 <p class="text-sm text-gray-500 mb-3">{{ Str::limit($class->course->description, 80) }}</p>
                                 <div class="flex justify-between items-center text-sm text-gray-500 mb-3">
-                                    <span>${{ number_format($class->price, 2) }}</span>
+                                    <span>Rp {{ number_format($class->price, 0, ',', '.') }}</span>
                                     <span>{{ $class->getAvailableSpotsAttribute() }}/{{ $class->quota }} spots</span>
                                 </div>
                                 <button class="btn-primary btn-sm w-full">Enroll Now</button>
@@ -228,7 +228,7 @@
                         @foreach($paymentHistory as $payment)
                             <div class="flex items-center justify-between p-3 border rounded-lg">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900">${{ number_format($payment->amount, 2) }}</p>
+                                    <p class="text-sm font-medium text-gray-900">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
                                     <p class="text-xs text-gray-500">{{ $payment->registration->class->course->course_name }}</p>
                                     <p class="text-xs text-gray-400">{{ $payment->payment_date->format('M d, Y') }}</p>
                                 </div>

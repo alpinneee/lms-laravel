@@ -109,6 +109,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Course Schedule Management
     Route::get('/course-schedule', [CourseScheduleController::class, 'index'])->name('course-schedule.index');
+    Route::get('/course-schedule/{course}/{class}', [CourseScheduleController::class, 'show'])->name('course-schedule.show');
     Route::get('/course-schedule/day/{date}', [CourseScheduleController::class, 'dayView'])->name('course-schedule.day');
     
     // Course Types Management

@@ -75,7 +75,7 @@
                         
                         <div class="sm:col-span-1">
                             <dt class="text-sm font-medium text-gray-500">Total Revenue</dt>
-                            <dd class="mt-1 text-xl font-semibold text-gray-900">${{ number_format($stats['revenue'], 2) }}</dd>
+                            <dd class="mt-1 text-xl font-semibold text-gray-900">Rp {{ number_format($stats['revenue'], 0, ',', '.') }}</dd>
                         </div>
                         
                         <div class="sm:col-span-1">

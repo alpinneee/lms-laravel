@@ -161,12 +161,27 @@ class AuthController extends Controller
         // Send email with error handling
         try {
             Mail::to($user->email)->send(new PasswordResetEmail($user, $token));
+            return redirect()->back()->with('success', 'Link reset password telah dikirim ke email Anda.');
         } catch (\Exception $e) {
             \Log::error('Email sending failed: ' . $e->getMessage());
-            // Continue anyway - reset URL is saved
+            
+            // Return with detailed error for debugging
+            $errorMessage = 'Gagal mengirim email reset password. ';
+            
+            if (config('mail.mailer') === 'log') {
+                $errorMessage .= 'Email disimpan di log file (storage/logs/laravel.log). ';
+            } elseif (config('mail.mailer') === 'smtp' && config('mail.host') === 'smtp.resend.com') {
+                $errorMessage .= 'Error Resend SMTP: ' . $e->getMessage() . '. Periksa MAIL_PASSWORD (API Key)';
+            } else {
+                $errorMessage .= 'Error: ' . $e->getMessage() . '. ';
+            }
+            
+            if (config('mail.mailer') !== 'log') {
+                $errorMessage .= '. Periksa konfigurasi email di file .env';
+            }
+            
+            return redirect()->back()->with('error', $errorMessage);
         }
-        
-        return redirect()->back()->with('success', 'Link reset password telah dikirim ke email Anda.');
     }
     
     public function showResetForm(Request $request, $token)

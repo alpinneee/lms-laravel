@@ -15,7 +15,37 @@
             <p class="mt-2 text-center text-sm text-gray-600">
                 Masukkan email Anda untuk reset password
             </p>
+            @if(config('app.debug'))
+                <div class="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 text-xs rounded">
+                    <strong>Debug Info:</strong><br>
+                    Mail Driver: {{ config('mail.mailer') }}<br>
+                    @if(config('mail.mailer') === 'log')
+                        Email akan disimpan di: storage/logs/laravel.log
+                    @elseif(config('mail.mailer') === 'smtp' && config('mail.host') === 'smtp.resend.com')
+                        Resend SMTP Host: {{ config('mail.host') }}<br>
+                        Port: {{ config('mail.port') }}<br>
+                        Username: {{ config('mail.username') }}<br>
+                        API Key: {{ config('mail.password') ? 'Configured' : 'Not Set' }}<br>
+                        From: {{ config('mail.from.address') }}
+                    @else
+                        Mail Host: {{ config('mail.host') }}<br>
+                        Mail Port: {{ config('mail.port') }}
+                    @endif
+                </div>
+            @endif
         </div>
+        
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
         
         <form class="mt-8 space-y-6" action="{{ route('password.email') }}" method="POST">
             @csrf

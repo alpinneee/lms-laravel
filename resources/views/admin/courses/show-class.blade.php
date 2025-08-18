@@ -63,7 +63,7 @@
                         
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Price</dt>
-                            <dd class="mt-1 text-sm text-gray-900">${{ number_format($class->price, 2) }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900">Rp {{ number_format($class->price, 0, ',', '.') }}</dd>
                         </div>
                         
                         <div>
@@ -209,7 +209,7 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Total Revenue</dt>
                             <dd class="mt-1 text-2xl font-semibold text-gray-900">
-                                ${{ number_format($class->registrations->where('payment_status', 'paid')->sum('payment'), 2) }}
+                                Rp {{ number_format($class->registrations->where('payment_status', 'paid')->sum('payment'), 0, ',', '.') }}
                             </dd>
                         </div>
                     </dl>
@@ -277,7 +277,7 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">${{ number_format($registration->payment, 2) }}</div>
+                                    <div class="text-sm text-gray-900">Rp {{ number_format($registration->payment, 0, ',', '.') }}</div>
                                     <div class="text-xs {{ $registration->payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600' }}">
                                         {{ ucfirst($registration->payment_status) }}
                                     </div>

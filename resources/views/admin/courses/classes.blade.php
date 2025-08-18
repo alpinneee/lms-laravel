@@ -101,7 +101,7 @@
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">
-                                        ${{ number_format($class->price, 2) }}
+                                        Rp {{ number_format($class->price, 0, ',', '.') }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">

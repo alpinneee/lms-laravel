@@ -79,7 +79,7 @@
                 <div class="ml-5 w-0 flex-1">
                     <dl>
                         <dt class="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
-                        <dd class="text-2xl font-bold text-gray-900">${{ number_format($stats['total_revenue'], 2) }}</dd>
+                        <dd class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</dd>
                     </dl>
                 </div>
             </div>

@@ -13,11 +13,16 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => 60,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            'verify_peer' => env('MAIL_VERIFY_PEER', true),
         ],
         
         'log' => [
             'transport' => 'log',
             'channel' => env('MAIL_LOG_CHANNEL'),
+        ],
+        
+        'resend' => [
+            'transport' => 'resend',
         ],
     ],
     

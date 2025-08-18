@@ -33,37 +33,30 @@ class CertificateController extends Controller
         $query = Certificate::with(['participant.user', 'course'])
             ->where('instructure_id', $instructor->id);
         
-        // Apply filters if provided
-        $status = $request->input('status');
-        $courseId = $request->input('course_id');
-        $participantId = $request->input('participant_id');
-        $dateRange = $request->input('date_range');
-        
-        if ($status) {
-            if ($status === 'valid') {
-                $query->valid();
-            } elseif ($status === 'expired') {
-                $query->expired();
-            } elseif ($status === 'expiring_soon') {
-                $query->expiringSoon(30);
-            }
+        // Apply search filter
+        $search = $request->input('search');
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('certificate_number', 'like', '%' . $search . '%')
+                  ->orWhereHas('participant.user', function($q2) use ($search) {
+                      $q2->where('name', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('course', function($q2) use ($search) {
+                      $q2->where('course_name', 'like', '%' . $search . '%');
+                  });
+            });
         }
         
-        if ($courseId) {
-            $query->where('course_id', $courseId);
+        // Apply date filters
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        
+        if ($startDate) {
+            $query->whereDate('issue_date', '>=', $startDate);
         }
         
-        if ($participantId) {
-            $query->where('participant_id', $participantId);
-        }
-        
-        if ($dateRange) {
-            $dates = explode(' - ', $dateRange);
-            if (count($dates) === 2) {
-                $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $dates[0])->startOfDay();
-                $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $dates[1])->endOfDay();
-                $query->whereBetween('issue_date', [$startDate, $endDate]);
-            }
+        if ($endDate) {
+            $query->whereDate('issue_date', '<=', $endDate);
         }
         
         $certificates = $query->latest()->paginate(10);
@@ -87,14 +80,7 @@ class CertificateController extends Controller
         ];
         
         return view('instructor.certificates.index', compact(
-            'certificates', 
-            'courses', 
-            'participants', 
-            'stats',
-            'status',
-            'courseId',
-            'participantId',
-            'dateRange'
+            'certificates'
         ));
     }
     

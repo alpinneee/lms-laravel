@@ -6,276 +6,158 @@
 <div class="space-y-6">
     <!-- Page Header -->
     <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Course Schedule</h1>
-            <p class="mt-1 text-sm text-gray-500">Manage course schedules, time slots, and room assignments</p>
-        </div>
-        <div>
-            <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Back to Courses
+        <h1 class="text-2xl font-semibold text-gray-900">Course Schedule</h1>
+        <div class="flex items-center gap-4">
+            <a href="{{ route('admin.courses.create-class', ['course' => 1]) }}" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+                Add New Course Schedule
             </a>
-        </div>
-    </div>
-
-    <!-- Month Navigation and Filters -->
-    <div class="card">
-        <div class="card-header flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <a href="{{ route('admin.course-schedule.index', ['month' => $prevMonth->month, 'year' => $prevMonth->year]) }}" class="btn btn-sm btn-secondary">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </a>
-                <h2 class="text-lg font-medium text-gray-900">{{ $currentDate->format('F Y') }}</h2>
-                <a href="{{ route('admin.course-schedule.index', ['month' => $nextMonth->month, 'year' => $nextMonth->year]) }}" class="btn btn-sm btn-secondary">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-            </div>
-            <button type="button" id="filter-toggle" class="btn btn-sm btn-secondary">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                Filters
-            </button>
-        </div>
-        
-        <!-- Filters Form -->
-        <div id="filters-panel" class="card-body border-t border-gray-200 {{ request()->hasAny(['course_id', 'instructor_id', 'location']) ? '' : 'hidden' }}">
-            <form method="GET" action="{{ route('admin.course-schedule.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="hidden" name="month" value="{{ $month }}">
-                <input type="hidden" name="year" value="{{ $year }}">
-                
-                <!-- Course Filter -->
-                <div>
-                    <label for="course_id" class="block text-sm font-medium text-gray-700">Course</label>
-                    <select name="course_id" id="course_id" class="form-select mt-1">
-                        <option value="">All Courses</option>
-                        @foreach($courses as $course)
-                            <option value="{{ $course->id }}" {{ $courseId == $course->id ? 'selected' : '' }}>
-                                {{ $course->course_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Instructor Filter -->
-                <div>
-                    <label for="instructor_id" class="block text-sm font-medium text-gray-700">Instructor</label>
-                    <select name="instructor_id" id="instructor_id" class="form-select mt-1">
-                        <option value="">All Instructors</option>
-                        @foreach($instructors as $instructor)
-                            <option value="{{ $instructor->id }}" {{ $instructorId == $instructor->id ? 'selected' : '' }}>
-                                {{ $instructor->full_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Location Filter -->
-                <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                    <select name="location" id="location" class="form-select mt-1">
-                        <option value="">All Locations</option>
-                        @foreach($locations as $loc)
-                            <option value="{{ $loc }}" {{ $location == $loc ? 'selected' : '' }}>
-                                {{ $loc }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Filter Actions -->
-                <div class="md:col-span-3 flex justify-end space-x-2">
-                    <a href="{{ route('admin.course-schedule.index', ['month' => $month, 'year' => $year]) }}" class="btn btn-secondary">
-                        Clear Filters
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        Apply Filters
-                    </button>
-                </div>
+            <form method="GET" action="{{ route('admin.course-schedule.index') }}" class="flex">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search..." class="border border-gray-300 rounded px-3 py-2 text-sm w-64">
+                <button type="submit" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">Search</button>
             </form>
         </div>
     </div>
 
-    <!-- Calendar -->
-    <div class="card">
-        <div class="card-body p-0">
-            <div id="calendar"></div>
+    @if($classes->isEmpty() && !request('search'))
+        <!-- Error Message -->
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Server responded with 500
         </div>
-    </div>
+    @endif
 
-    <!-- Legend -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="text-lg font-medium text-gray-900">Legend</h2>
+    <!-- Schedule Table -->
+    <div class="bg-white shadow overflow-hidden rounded-lg">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NO</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CLASS NAME</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DATE</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LOCATION</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($classes as $index => $class)
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $classes->firstItem() + $index }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $class->course->course_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $class->start_date->format('M d, Y') }} - {{ $class->end_date->format('M d, Y') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $class->location }}{{ $class->room ? ' - ' . $class->room : '' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($class->status === 'active')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded bg-green-100 text-green-800">
+                                        Active
+                                    </span>
+                                @elseif($class->status === 'inactive')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded bg-red-100 text-red-800">
+                                        Inactive
+                                    </span>
+                                @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded bg-gray-100 text-gray-800">
+                                        {{ ucfirst($class->status) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('admin.course-schedule.show', [$class->course_id, $class->id]) }}" class="text-gray-600 hover:text-gray-900">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        Detail
+                                    </a>
+                                    <a href="{{ route('admin.courses.edit-class', [$class->course_id, $class->id]) }}" class="text-blue-600 hover:text-blue-900">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        Edit
+                                    </a>
+                                    <form method="POST" action="#" class="inline" onsubmit="return confirm('Are you sure you want to delete this schedule?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                @if(request('search'))
+                                    No course schedules found for "{{ request('search') }}".
+                                @else
+                                    No course schedules found.
+                                @endif
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        <div class="card-body">
-            <div class="flex flex-wrap gap-4">
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-                    <span class="text-sm text-gray-700">Active Classes</span>
+        
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                @if($classes->previousPageUrl())
+                    <a href="{{ $classes->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+                @else
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">Previous</span>
+                @endif
+                
+                @if($classes->nextPageUrl())
+                    <a href="{{ $classes->nextPageUrl() }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+                @else
+                    <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">Next</span>
+                @endif
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Showing <span class="font-medium">{{ $classes->firstItem() ?? 0 }}</span> - <span class="font-medium">{{ $classes->lastItem() ?? 0 }}</span> of <span class="font-medium">{{ $classes->total() }}</span> results
+                    </p>
                 </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full bg-yellow-500 mr-2"></div>
-                    <span class="text-sm text-gray-700">Inactive Classes</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full bg-gray-500 mr-2"></div>
-                    <span class="text-sm text-gray-700">Completed Classes</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
-                    <span class="text-sm text-gray-700">Other</span>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        @if($classes->previousPageUrl())
+                            <a href="{{ $classes->previousPageUrl() }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                Previous
+                            </a>
+                        @else
+                            <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                Previous
+                            </span>
+                        @endif
+                        
+                        <span class="bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                            {{ $classes->currentPage() }}
+                        </span>
+                        
+                        @if($classes->nextPageUrl())
+                            <a href="{{ $classes->nextPageUrl() }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                Next
+                            </a>
+                        @else
+                            <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                Next
+                            </span>
+                        @endif
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Event Details Modal -->
-<div id="event-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-medium text-gray-900" id="modal-title"></h3>
-                <button type="button" id="close-modal" class="text-gray-400 hover:text-gray-500">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <div class="px-6 py-4">
-            <div class="space-y-3">
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Date</p>
-                    <p class="text-sm text-gray-900" id="modal-date"></p>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Location</p>
-                    <p class="text-sm text-gray-900" id="modal-location"></p>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Room</p>
-                    <p class="text-sm text-gray-900" id="modal-room"></p>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Instructors</p>
-                    <p class="text-sm text-gray-900" id="modal-instructors"></p>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Status</p>
-                    <p class="text-sm text-gray-900" id="modal-status"></p>
-                </div>
-            </div>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-            <a href="#" id="modal-view-link" class="btn btn-primary">View Class Details</a>
-        </div>
-    </div>
-</div>
-
-@push('styles')
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.0/main.min.css" rel="stylesheet">
-<style>
-    .fc-event {
-        cursor: pointer;
-    }
-    .fc-day-today {
-        background-color: rgba(96, 165, 250, 0.1) !important;
-    }
-    .fc-toolbar-title {
-        font-size: 1.25rem !important;
-    }
-</style>
-@endpush
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.0/main.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize calendar
-        const calendarEl = document.getElementById('calendar');
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            initialDate: '{{ $currentDate->format("Y-m-d") }}',
-            headerToolbar: {
-                left: '',
-                center: '',
-                right: ''
-            },
-            events: @json($events),
-            eventClick: function(info) {
-                showEventModal(info.event);
-            }
-        });
-        calendar.render();
-        
-        // Event modal handling
-        const modal = document.getElementById('event-modal');
-        const closeModal = document.getElementById('close-modal');
-        
-        closeModal.addEventListener('click', function() {
-            modal.classList.add('hidden');
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-        
-        // Filter toggle
-        const filterToggle = document.getElementById('filter-toggle');
-        const filtersPanel = document.getElementById('filters-panel');
-        
-        filterToggle.addEventListener('click', function() {
-            filtersPanel.classList.toggle('hidden');
-        });
-        
-        // Auto-submit form when filters change
-        const filterSelects = document.querySelectorAll('#course_id, #instructor_id, #location');
-        filterSelects.forEach(select => {
-            select.addEventListener('change', function() {
-                this.form.submit();
-            });
-        });
-    });
-    
-    function showEventModal(event) {
-        const modal = document.getElementById('event-modal');
-        
-        // Set modal content
-        document.getElementById('modal-title').textContent = event.title;
-        document.getElementById('modal-date').textContent = formatDateRange(event.start, new Date(event.end.getTime() - 86400000)); // Subtract a day from end date
-        document.getElementById('modal-location').textContent = event.extendedProps.location;
-        document.getElementById('modal-room').textContent = event.extendedProps.room;
-        document.getElementById('modal-instructors').textContent = event.extendedProps.instructors;
-        document.getElementById('modal-status').textContent = event.extendedProps.status.charAt(0).toUpperCase() + event.extendedProps.status.slice(1);
-        
-        // Set view link
-        document.getElementById('modal-view-link').href = event.extendedProps.url;
-        
-        // Show modal
-        modal.classList.remove('hidden');
-    }
-    
-    function formatDateRange(start, end) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        const startStr = start.toLocaleDateString('en-US', options);
-        const endStr = end.toLocaleDateString('en-US', options);
-        
-        if (startStr === endStr) {
-            return startStr;
-        }
-        
-        return `${startStr} - ${endStr}`;
-    }
-</script>
-@endpush
 @endsection

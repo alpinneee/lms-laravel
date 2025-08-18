@@ -58,6 +58,17 @@ class GoogleController extends Controller
                     ]);
                 }
                 
+                // Pastikan profil instructor ada jika user adalah instructor
+                if ($user->isInstructor() && !$user->instructure) {
+                    $instructure = \App\Models\Instructure::create([
+                        'full_name' => $user->name,
+                        'phone_number' => '',
+                        'address' => '',
+                        'proficiency' => '',
+                    ]);
+                    $user->update(['instructure_id' => $instructure->id]);
+                }
+                
                 Auth::login($user);
                 
                 // Redirect berdasarkan role
@@ -82,6 +93,17 @@ class GoogleController extends Controller
                         'user_id' => $existingUser->id,
                         'full_name' => $existingUser->name,
                     ]);
+                }
+                
+                // Pastikan profil instructor ada jika user adalah instructor
+                if ($existingUser->isInstructor() && !$existingUser->instructure) {
+                    $instructure = \App\Models\Instructure::create([
+                        'full_name' => $existingUser->name,
+                        'phone_number' => '',
+                        'address' => '',
+                        'proficiency' => '',
+                    ]);
+                    $existingUser->update(['instructure_id' => $instructure->id]);
                 }
                 
                 Auth::login($existingUser);

@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | cURL SSL Verification
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether cURL should verify SSL certificates.
+    | Set to false in development to bypass SSL certificate issues.
+    |
+    */
+
+    'curl_verify_ssl' => env('CURL_VERIFY_SSL', true),
+
 ];
