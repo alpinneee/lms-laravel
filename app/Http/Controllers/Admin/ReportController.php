@@ -95,6 +95,55 @@ class ReportController extends Controller
         ));
     }
 
+    public function bankAccounts()
+    {
+        $bankAccounts = \App\Models\BankAccount::latest()->get();
+        return view('admin.reports.bank-accounts', compact('bankAccounts'));
+    }
+
+    public function storeBankAccount(Request $request)
+    {
+        $request->validate([
+            'bank_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+            'account_name' => 'required|string|max:255'
+        ]);
+
+        \App\Models\BankAccount::create([
+            'bank_name' => $request->bank_name,
+            'account_number' => $request->account_number,
+            'account_name' => $request->account_name,
+            'is_active' => true
+        ]);
+
+        return redirect()->back()->with('success', 'Bank account added successfully.');
+    }
+
+    public function toggleBankAccount($id)
+    {
+        $bank = \App\Models\BankAccount::findOrFail($id);
+        $bank->update(['is_active' => !$bank->is_active]);
+        return redirect()->back()->with('success', 'Bank account status updated.');
+    }
+
+    public function updatePaymentStatus(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:pending,verified,rejected']);
+        
+        $payment = Payment::findOrFail($id);
+        $payment->update(['status' => $request->status]);
+        
+        // Update registration status if payment is verified
+        if ($request->status === 'verified') {
+            $payment->registration->update([
+                'payment_status' => 'paid',
+                'reg_status' => 'approved'
+            ]);
+        }
+        
+        return redirect()->back()->with('success', 'Payment status updated successfully.');
+    }
+
     /**
      * Display payment report.
      */
@@ -108,7 +157,7 @@ class ReportController extends Controller
         $dateRange = $request->input('date_range');
         
         // Query payments
-        $query = Payment::with(['participant.user', 'course']);
+        $query = Payment::with(['registration.participant.user', 'registration.class.course', 'bankAccount']);
         
         // Apply filters
         if ($status) {

@@ -136,9 +136,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/certificate-expired', [\App\Http\Controllers\Admin\ReportController::class, 'certificateExpired'])->name('certificate-expired');
-        
         Route::get('/payment-report', [\App\Http\Controllers\Admin\ReportController::class, 'paymentReport'])->name('payment-report');
+        Route::get('/bank-accounts', [\App\Http\Controllers\Admin\ReportController::class, 'bankAccounts'])->name('bank-accounts');
+        Route::post('/bank-accounts', [\App\Http\Controllers\Admin\ReportController::class, 'storeBankAccount'])->name('store-bank-account');
+        Route::post('/bank-accounts/{id}/toggle', [\App\Http\Controllers\Admin\ReportController::class, 'toggleBankAccount'])->name('toggle-bank-account');
     });
+    
+    // Payment management
+    Route::post('/payments/{id}/update-status', [\App\Http\Controllers\Admin\ReportController::class, 'updatePaymentStatus'])->name('update-payment-status');
 });
 
 // Instructor Routes
@@ -171,13 +176,9 @@ Route::middleware(['auth', 'role:participant'])->prefix('participant')->name('pa
     
     // My Courses
     Route::prefix('courses')->name('courses.')->group(function () {
-        Route::get('/', function () {
-            return view('participant.placeholder', [
-                'title' => 'My Courses',
-                'description' => 'View your enrolled courses and progress.',
-                'breadcrumbs' => ['My Courses']
-            ]);
-        })->name('index');
+        Route::get('/', [\App\Http\Controllers\Participant\CourseController::class, 'index'])->name('index');
+        Route::post('/{class}/register', [\App\Http\Controllers\Participant\CourseController::class, 'register'])->name('register');
+        Route::get('/{class}/detail', [\App\Http\Controllers\Participant\CourseController::class, 'detail'])->name('detail');
         
         Route::get('/browse', function () {
             return view('participant.placeholder', [
@@ -208,16 +209,8 @@ Route::middleware(['auth', 'role:participant'])->prefix('participant')->name('pa
     
     // Payment
     Route::prefix('payment')->name('payment.')->group(function () {
-        Route::get('/', function () {
-            return view('participant.placeholder', [
-                'title' => 'Payment Management',
-                'description' => 'Manage your course payments and upload payment proofs.',
-                'breadcrumbs' => ['Payment']
-            ]);
-        })->name('index');
-        
-        Route::get('/upload', function () { return view('participant.placeholder', ['title' => 'Upload Payment Proof']); })->name('upload');
-        Route::post('/upload', function () { return redirect()->route('participant.payment.index')->with('success', 'Payment proof uploaded successfully'); })->name('store');
+        Route::get('/', [\App\Http\Controllers\Participant\PaymentController::class, 'index'])->name('index');
+        Route::post('/upload', [\App\Http\Controllers\Participant\PaymentController::class, 'upload'])->name('upload');
     });
 });
 

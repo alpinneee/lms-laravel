@@ -12,9 +12,6 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
-    /**
-     * Display a listing of the payments.
-     */
     public function index()
     {
         $participant = auth()->user()->participant;
@@ -24,30 +21,14 @@ class PaymentController extends Controller
                 ->with('error', 'Participant profile not found.');
         }
 
-        $registrations = $participant->registrations()
-            ->with(['class.course', 'payments'])
+        $payments = Payment::whereHas('registration', function ($query) use ($participant) {
+                $query->where('participant_id', $participant->id);
+            })
+            ->with(['registration.class.course', 'bankAccount'])
             ->latest()
             ->get();
 
-        $pendingPayments = Payment::whereHas('registration', function ($query) use ($participant) {
-                $query->where('participant_id', $participant->id);
-            })
-            ->where('status', 'pending')
-            ->count();
-
-        $totalPaid = Payment::whereHas('registration', function ($query) use ($participant) {
-                $query->where('participant_id', $participant->id);
-            })
-            ->where('status', 'verified')
-            ->sum('amount');
-
-        $stats = [
-            'total_registrations' => $registrations->count(),
-            'pending_payments' => $pendingPayments,
-            'total_paid' => $totalPaid,
-        ];
-
-        return view('participant.payment.index', compact('registrations', 'stats'));
+        return view('participant.payment.index', compact('payments'));
     }
 
     /**
@@ -65,6 +46,39 @@ class PaymentController extends Controller
         $bankAccounts = BankAccount::where('is_active', true)->get();
 
         return view('participant.payment.upload', compact('registration', 'bankAccounts'));
+    }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'registration_id' => 'required|exists:course_registrations,id',
+            'payment_proof' => 'required|image|max:2048',
+            'bank_account_id' => 'required|exists:bank_accounts,id'
+        ]);
+        
+        $registration = CourseRegistration::findOrFail($request->registration_id);
+        
+        // Store payment proof
+        $path = $request->file('payment_proof')->store('payments', 'public');
+        
+        // Create payment record
+        Payment::create([
+            'registration_id' => $registration->id,
+            'bank_account_id' => $request->bank_account_id,
+            'payment_proof' => $path,
+            'amount' => $registration->payment,
+            'payment_date' => now(),
+            'status' => 'pending'
+        ]);
+        
+        // Update registration status to pending verification
+        $registration->update([
+            'payment_status' => 'pending_verification',
+            'reg_status' => 'pending_verification'
+        ]);
+        
+        return redirect()->route('participant.courses.index')
+            ->with('success', 'Payment proof uploaded successfully! Waiting for admin verification.');
     }
 
     /**

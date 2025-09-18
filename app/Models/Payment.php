@@ -15,6 +15,7 @@ class Payment extends Model
         'participant_id',
         'course_id',
         'registration_id',
+        'bank_account_id',
         'amount',
         'payment_date',
         'due_date',
@@ -51,6 +52,14 @@ class Payment extends Model
     public function registration()
     {
         return $this->belongsTo(CourseRegistration::class, 'registration_id');
+    }
+
+    /**
+     * Get the bank account associated with this payment.
+     */
+    public function bankAccount()
+    {
+        return $this->belongsTo(BankAccount::class);
     }
 
     /**

@@ -261,15 +261,15 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $payment->participant->full_name }}
+                                        {{ $payment->registration->participant->full_name ?? 'N/A' }}
                                     </div>
                                     <div class="text-xs text-gray-500">
-                                        {{ $payment->participant->user->email ?? 'N/A' }}
+                                        {{ $payment->registration->participant->user->email ?? 'N/A' }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="text-sm text-gray-900">
-                                        {{ $payment->course->course_name }}
+                                        {{ $payment->registration->class->course->course_name ?? 'N/A' }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
@@ -313,32 +313,20 @@
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium actions-cell">
                                     <div class="action-buttons">
-                                        <a href="#" class="text-blue-600 hover:text-blue-900" title="View Details">
+                                        <button onclick="viewPayment({{ $payment->id }})" class="text-blue-600 hover:text-blue-900" title="View Details">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                             </svg>
-                                        </a>
+                                        </button>
                                         
-                                        <a href="#" class="text-indigo-600 hover:text-indigo-900" title="Edit Payment">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                            </svg>
-                                        </a>
-                                        
-                                        @if($payment->getRawOriginal('payment_proof'))
-                                            <a href="#" class="text-green-600 hover:text-green-900" title="View Proof" target="_blank">
+                                        @if($payment->payment_proof)
+                                            <a href="{{ asset('storage/' . $payment->payment_proof) }}" class="text-green-600 hover:text-green-900" title="View Proof" target="_blank">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                                 </svg>
                                             </a>
                                         @endif
-                                        
-                                        <a href="#" class="text-gray-600 hover:text-gray-900" title="Print Invoice">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                                            </svg>
-                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -478,6 +466,47 @@
             alert('Export functionality will be implemented here.');
         });
     });
+    
+    function viewPayment(paymentId) {
+        const payment = @json($payments->keyBy('id'));
+        const data = payment[paymentId];
+        
+        const modalContent = `
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" id="paymentModal">
+                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Payment Details</h3>
+                    <form id="updatePaymentForm" action="/admin/payments/${paymentId}/update-status" method="POST">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <div class="space-y-3 text-sm">
+                            <div><strong>Course:</strong> ${data.registration.class.course.course_name}</div>
+                            <div><strong>Participant:</strong> ${data.registration.participant.full_name}</div>
+                            <div><strong>Amount:</strong> Rp ${new Intl.NumberFormat('id-ID').format(data.amount)}</div>
+                            <div><strong>Payment Date:</strong> ${data.payment_date}</div>
+                            ${data.bank_account ? `<div><strong>Bank:</strong> ${data.bank_account.bank_name} - ${data.bank_account.account_number}</div>` : ''}
+                            <div>
+                                <label class="block font-medium mb-1">Status:</label>
+                                <select name="status" class="w-full border border-gray-300 rounded px-3 py-2">
+                                    <option value="pending" ${data.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="verified" ${data.status === 'verified' ? 'selected' : ''}>Verified</option>
+                                    <option value="rejected" ${data.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex gap-2">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Status</button>
+                            <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('paymentModal');
+        if (modal) modal.remove();
+    }
 </script>
 @endpush
 @endsection
