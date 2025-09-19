@@ -77,7 +77,7 @@ class CourseController extends Controller
 
     public function detail($classId)
     {
-        $class = ClassModel::with(['course', 'instructures'])->findOrFail($classId);
+        $class = ClassModel::with(['course', 'instructures', 'materials', 'registrations.participant.user'])->findOrFail($classId);
         $participant = auth()->user()->participant;
         
         // Check if participant is registered for this class

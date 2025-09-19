@@ -1,73 +1,186 @@
 @extends('layouts.participant')
 
-@section('title', 'Course Detail')
+@section('title', 'Course Schedule Detail')
 
 @section('content')
 <div class="space-y-3">
+    <!-- Page Header -->
     <div class="flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-gray-900">{{ $class->course->course_name }}</h1>
-        <a href="{{ route('participant.courses.index') }}" class="text-blue-600 hover:text-blue-800 text-sm">← Back</a>
+        <h1 class="text-lg font-medium text-gray-900">Course Schedule Detail</h1>
+        <a href="{{ route('participant.courses.index') }}" class="bg-gray-600 text-white px-3 py-1.5 rounded text-xs hover:bg-gray-700">
+            Back
+        </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm border">
-        @if($class->course->image)
-            <img src="{{ asset('storage/' . $class->course->image) }}" alt="{{ $class->course->course_name }}" class="w-full h-32 object-cover rounded-t-lg">
-        @endif
+    <!-- Course Details -->
+    <div class="bg-white shadow rounded border p-4">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-medium text-gray-900">{{ $class->course->course_name }}</h2>
+            <a href="{{ route('participant.certificates.request', ['class_id' => $class->id]) }}" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">
+                Request Certificate
+            </a>
+        </div>
         
-        <div class="p-4">
-            <div class="flex items-center justify-between mb-3">
-                <span class="px-2 py-1 text-xs rounded {{ $registration->reg_status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                    {{ $registration->reg_status === 'approved' ? 'Approved' : 'Pending' }}
-                </span>
-                <span class="text-xs text-gray-500">Rp {{ number_format($registration->payment / 1000000, 1) }}M</span>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div>
+                <span class="text-gray-500 block">Date</span>
+                <span class="text-gray-900">{{ $class->start_date->format('j M') }} - {{ $class->end_date->format('j M Y') }}</span>
             </div>
-            
-            <p class="text-sm text-gray-600 mb-4">{{ Str::limit($class->course->description, 120) }}</p>
-            
-            <div class="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-4">
-                <div>📅 {{ $class->start_date->format('M d') }} - {{ $class->end_date->format('M d, Y') }}</div>
-                <div>📍 {{ Str::limit($class->location, 20) }}</div>
-                <div>⏱️ {{ $class->duration_day }} days</div>
-                <div>👥 {{ $class->quota }} capacity</div>
+            <div>
+                <span class="text-gray-500 block">Registration</span>
+                <span class="text-gray-900">{{ $class->reg_start_date ? $class->reg_start_date->format('j M') : '-' }} - {{ $class->reg_end_date ? $class->reg_end_date->format('j M') : '-' }}</span>
             </div>
-            
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <h3 class="text-sm font-medium text-gray-900 mb-2">Instructors ({{ $class->instructures->count() }})</h3>
-                    <div class="space-y-1">
-                        @foreach($class->instructures as $instructor)
-                            <div class="flex items-center space-x-2 text-xs">
-                                <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                                    <span class="text-white text-xs">{{ substr($instructor->full_name, 0, 1) }}</span>
-                                </div>
-                                <div>
-                                    <div class="font-medium text-gray-900">{{ Str::limit($instructor->full_name, 15) }}</div>
-                                    <div class="text-gray-500">{{ Str::limit($instructor->specialization, 20) }}</div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-sm font-medium text-gray-900 mb-2">Participants ({{ $otherParticipants->count() }})</h3>
-                    <div class="space-y-1 max-h-32 overflow-y-auto">
-                        @forelse($otherParticipants as $reg)
-                            <div class="flex items-center space-x-2 text-xs">
-                                <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                    <span class="text-white text-xs">{{ substr($reg->participant->full_name, 0, 1) }}</span>
-                                </div>
-                                <div class="truncate">
-                                    <div class="font-medium text-gray-900">{{ Str::limit($reg->participant->full_name, 15) }}</div>
-                                </div>
-                            </div>
+            <div>
+                <span class="text-gray-500 block">Location</span>
+                <span class="text-gray-900">{{ $class->location }}{{ $class->room ? ' - ' . $class->room : '' }}</span>
+            </div>
+            <div>
+                <span class="text-gray-500 block">Price / Quota</span>
+                <span class="text-gray-900">Rp {{ number_format($class->course->price ?? 0, 0, ',', '.') }} / {{ $class->quota }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white shadow rounded border">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-4 px-3" aria-label="Tabs">
+                <button class="tab-button active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-xs" data-tab="participant">
+                    Participants ({{ $class->registrations->count() }})
+                </button>
+                <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-xs" data-tab="instructure">
+                    Instructors
+                </button>
+                <button class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-xs" data-tab="elearning">
+                    Materials
+                </button>
+            </nav>
+        </div>
+
+        <!-- Participant Tab -->
+        <div id="participant-tab" class="tab-content p-3">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($class->registrations as $index => $registration)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-2 py-2 text-xs text-gray-900">{{ $index + 1 }}</td>
+                                <td class="px-2 py-2 text-xs text-gray-900 font-medium">{{ $registration->participant->user->name }}</td>
+                            </tr>
                         @empty
-                            <p class="text-xs text-gray-500">No participants yet</p>
+                            <tr>
+                                <td colspan="2" class="px-2 py-4 text-center text-xs text-gray-500">
+                                    No participants found
+                                </td>
+                            </tr>
                         @endforelse
-                    </div>
-                </div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Instructure Tab -->
+        <div id="instructure-tab" class="tab-content p-3 hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Specialization</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($class->instructures as $index => $instructor)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-2 py-2 text-xs text-gray-900">{{ $index + 1 }}</td>
+                                <td class="px-2 py-2 text-xs text-gray-900 font-medium">{{ $instructor->full_name }}</td>
+                                <td class="px-2 py-2 text-xs text-gray-600">{{ $instructor->specialization }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="px-2 py-4 text-center text-xs text-gray-500">
+                                    No instructors assigned
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- E-Learning Tab -->
+        <div id="elearning-tab" class="tab-content p-3 hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Day</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($class->materials as $material)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-2 py-2 text-xs text-gray-900">Day {{ $material->day }}</td>
+                                <td class="px-2 py-2 text-xs text-gray-900 font-medium">{{ $material->title }}</td>
+                                <td class="px-2 py-2 text-xs text-gray-600">{{ $material->size }}</td>
+                                <td class="px-2 py-2">
+                                    <a href="{{ $material->file_url }}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs">
+                                        Download
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-2 py-4 text-center text-xs text-gray-500">
+                                    No materials available
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active', 'border-blue-500', 'text-blue-600');
+            this.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Hide all tab contents
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+        });
+    });
+});
+</script>
 @endsection

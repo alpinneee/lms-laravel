@@ -105,6 +105,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('/{course}/classes/{class}', [CourseController::class, 'updateClass'])->name('update-class');
         Route::get('/{course}/classes/{class}/add-participant', [CourseController::class, 'addParticipant'])->name('add-participant');
         Route::post('/{course}/classes/{class}/participants', [CourseController::class, 'storeParticipant'])->name('store-participant');
+        Route::get('/{course}/classes/{class}/add-instructor', [CourseController::class, 'addInstructor'])->name('add-instructor');
+        Route::post('/{course}/classes/{class}/instructors', [CourseController::class, 'storeInstructor'])->name('store-instructor');
+        Route::delete('/{course}/classes/{class}/instructors/{instructor}', [CourseController::class, 'removeInstructor'])->name('remove-instructor');
+        Route::get('/{course}/classes/{class}/add-material', [CourseController::class, 'addMaterial'])->name('add-material');
+        Route::post('/{course}/classes/{class}/materials', [CourseController::class, 'storeMaterial'])->name('store-material');
+        Route::delete('/{course}/classes/{class}/materials/{material}', [CourseController::class, 'removeMaterial'])->name('remove-material');
     });
     
     // Course Schedule Management
@@ -156,6 +162,9 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
         Route::get('/{course}', [InstructorCourseController::class, 'show'])->name('show');
         Route::get('/{course}/attendance', [InstructorCourseController::class, 'attendance'])->name('attendance');
         Route::get('/{course}/materials', [InstructorCourseController::class, 'materials'])->name('materials');
+        Route::get('/{course}/classes/{class}/add-material', [InstructorCourseController::class, 'addMaterial'])->name('add-material');
+        Route::post('/{course}/classes/{class}/materials', [InstructorCourseController::class, 'storeMaterial'])->name('store-material');
+        Route::delete('/{course}/classes/{class}/materials/{material}', [InstructorCourseController::class, 'removeMaterial'])->name('remove-material');
     });
     
     // Certificates
@@ -201,6 +210,11 @@ Route::middleware(['auth', 'role:participant'])->prefix('participant')->name('pa
                 'breadcrumbs' => ['My Certificates']
             ]);
         })->name('index');
+        
+        Route::get('/request', function () {
+            return redirect()->route('participant.courses.index')
+                ->with('success', 'Certificate request submitted successfully.');
+        })->name('request');
         
         Route::get('/{certificate}/download', function () {
             return response()->json(['message' => 'Certificate download feature coming soon']);

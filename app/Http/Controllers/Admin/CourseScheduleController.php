@@ -57,7 +57,7 @@ class CourseScheduleController extends Controller
      */
     public function show($courseId, $classId)
     {
-        $class = ClassModel::with(['course', 'instructures', 'registrations.participant.user', 'registrations.payments'])
+        $class = ClassModel::with(['course', 'instructures', 'registrations.participant.user', 'registrations.payments', 'materials'])
             ->where('course_id', $courseId)
             ->findOrFail($classId);
         
