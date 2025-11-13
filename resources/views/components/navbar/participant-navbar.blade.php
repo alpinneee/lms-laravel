@@ -1,7 +1,8 @@
 <!-- Participant Navbar -->
-<div class="sticky top-0 z-40 flex h-13 shrink-0 items-center border-b border-gray-200 bg-primary-800  sm:px-8 lg:px-4 bg-[#362d98] text-white py-2 px-4 mt-2 mx-4 rounded-2xl shadow-md">
+<div class="sticky top-0 z-40 flex h-16 shrink-0 items-center border-b border-gray-200 bg-[#362d98] text-white py-2 px-3 sm:px-4 mt-1 sm:mt-2 mx-2 sm:mx-4 rounded-xl sm:rounded-2xl shadow-md">
     <button type="button" 
             id="sidebar-toggle"
+            onclick="toggleSidebar()"
             class="-m-2.5 p-2.5 text-white lg:hidden">
         <span class="sr-only">Open sidebar</span>
         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -10,8 +11,8 @@
     </button>
 
      <!-- Logo -->
-     <div class="flex items-center ml-2 lg:ml-0">
-        <img src="{{ asset('img/LogoT4B.png') }}" alt="Train4Best Logo" class="h-8">
+     <div class="flex items-center ml-1 sm:ml-2 lg:ml-0">
+        <img src="{{ asset('img/LogoT4B.png') }}" alt="Train4Best Logo" class="h-6 sm:h-8">
     </div>
 
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
@@ -37,7 +38,7 @@
 
                 <!-- Dropdown menu -->
                 <div id="user-menu" 
-                     class="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 hidden">
+                     class="absolute right-0 z-10 mt-2.5 w-36 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 hidden">
                     <a href="{{ route('profile.show') }}" class="block px-3 py-1 text-sm leading-6 text-gray-900 hover:bg-gray-50">Profil Saya</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

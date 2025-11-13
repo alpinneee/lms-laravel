@@ -16,23 +16,23 @@
 @section('content')
 <div class="space-y-8">
     <!-- Page Header -->
-    <div class="md:flex md:items-center md:justify-between">
+    <div class="space-y-4 sm:flex sm:items-center sm:justify-between sm:space-y-0">
         <div class="min-w-0 flex-1">
-            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+            <h1 class="text-xl font-bold leading-7 text-gray-900 sm:text-2xl lg:text-3xl">
                 Student Dashboard
             </h1>
             <p class="mt-1 text-sm text-gray-500">
-                Welcome back, {{ auth()->user()->name }}! Track your learning progress and discover new courses.
+                Welcome back, {{ auth()->user()->name }}!
             </p>
         </div>
-        <div class="mt-4 flex md:ml-4 md:mt-0">
-            <button type="button" class="btn-secondary btn-sm mr-3">
+        <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+            <button type="button" class="btn-secondary btn-sm flex items-center justify-center">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
                 Browse Courses
             </button>
-            <button type="button" class="btn-primary btn-sm">
+            <button type="button" class="btn-primary btn-sm flex items-center justify-center">
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Enrolled Courses -->
         <div class="stats-card">
             <div class="flex items-center">
@@ -121,9 +121,9 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <!-- Left Column - Current Courses & Progress -->
-        <div class="lg:col-span-2 space-y-8">
+        <div class="lg:col-span-2 space-y-6 lg:space-y-8">
             <!-- Current Learning Progress -->
             @if(count($learningProgress) > 0)
             <div class="card">
@@ -160,28 +160,28 @@
                     <p class="text-sm text-gray-500">Discover new learning opportunities</p>
                 </div>
                 <div class="card-body p-0">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-6">
                         @forelse($availableCourses as $class)
-                            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <div class="aspect-w-16 aspect-h-9 mb-3">
+                            <div class="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
+                                <div class="mb-3">
                                     <img src="{{ $class->course->image ?: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=200&fit=crop' }}" 
                                          alt="{{ $class->course->course_name }}" 
-                                         class="w-full h-32 object-cover rounded">
+                                         class="w-full h-24 sm:h-32 object-cover rounded">
                                 </div>
-                                <h4 class="font-medium text-gray-900 mb-2">{{ $class->course->course_name }}</h4>
-                                <p class="text-sm text-gray-500 mb-3">{{ Str::limit($class->course->description, 80) }}</p>
-                                <div class="flex justify-between items-center text-sm text-gray-500 mb-3">
-                                    <span>Rp {{ number_format($class->price, 0, ',', '.') }}</span>
+                                <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">{{ $class->course->course_name }}</h4>
+                                <p class="text-xs sm:text-sm text-gray-500 mb-3">{{ Str::limit($class->course->description, 60) }}</p>
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs sm:text-sm text-gray-500 mb-3 space-y-1 sm:space-y-0">
+                                    <span class="font-medium">Rp {{ number_format($class->price, 0, ',', '.') }}</span>
                                     <span>{{ $class->getAvailableSpotsAttribute() }}/{{ $class->quota }} spots</span>
                                 </div>
-                                <button class="btn-primary btn-sm w-full">Enroll Now</button>
+                                <button class="btn-primary btn-sm w-full text-xs sm:text-sm">Enroll Now</button>
                             </div>
                         @empty
-                            <div class="col-span-2 text-center py-8">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="col-span-1 sm:col-span-2 text-center py-6 sm:py-8">
+                                <svg class="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                 </svg>
-                                <p class="mt-2 text-sm text-gray-500">No courses available for enrollment</p>
+                                <p class="mt-2 text-sm text-gray-500">No courses available</p>
                             </div>
                         @endforelse
                     </div>
@@ -190,7 +190,7 @@
         </div>
 
         <!-- Right Column - Certificates & Activities -->
-        <div class="space-y-6">
+        <div class="space-y-4 lg:space-y-6">
             <!-- My Certificates -->
             @if(count($myCertificates) > 0)
             <div class="card">

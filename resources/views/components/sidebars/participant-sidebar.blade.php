@@ -1,5 +1,5 @@
 <!-- Participant Sidebar -->
-<div id="sidebar" class="fixed inset-y-0 z-50 flex w-56 flex-col transition-transform duration-300 lg:translate-x-0 -translate-x-full">
+<div id="sidebar" class="fixed top-16 left-0 bottom-0 z-30 flex w-56 flex-col" style="transform: translateX(-100%); transition: transform 0.3s ease;">
     <div class="flex grow flex-col gap-y-2 overflow-y-auto bg-gray-100 px-2 py-3">
         <!-- Logo -->
         <div class="mb-14">
